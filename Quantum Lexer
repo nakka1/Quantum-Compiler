@@ -1,0 +1,76 @@
+import re
+
+class Lexer:
+    def __init__(self, source_code):
+        self.source_code = source_code
+        self.tokens = []  
+        self.token_specification = [
+            ('QUANTUM_KEYWORD', r'qubit|H|CNOT|MEASURE|X|Y|Z|S|T|RX|RY|RZ|CX|CZ|SWAP|CCNOT|U3|U2|U1'), 
+            ('ARROW', r'->'),
+            ('IDENTIFIER', r'[a-zA-Z_][a-zA-Z0-9_]*'),  
+            ('SEMICOLON', r';'), 
+            ('COMMA', r','), 
+            ('NUMBER', r'\d+(\.\d*)?'), 
+            ('LPAREN', r'\('),  
+            ('RPAREN', r'\)'),  
+            ('SKIP', r'[ \t\n]+'),  
+            ('MISMATCH', r'.'),  
+        ]
+
+    def tokenize(self):
+        token_regex = '|'.join(f'(?P<{pair[0]}>{pair[1]})' for pair in self.token_specification)
+        line_number = 1
+        line_start = 0
+
+        for match in re.finditer(token_regex, self.source_code):
+            kind = match.lastgroup 
+            value = match.group() 
+            column_start = match.start() - line_start + 1  
+            column_end = match.end() - line_start  
+            if kind == 'SKIP':
+                if '\n' in value:
+                    line_number += value.count('\n')  
+                    line_start = match.end()  
+                continue
+
+            elif kind == 'MISMATCH':
+                print(f'Erro: Caractere inesperado {value!r} na linha {line_number}, coluna {column_start}')
+                return []  
+
+            else:
+                token_length = len(value)  
+                self.tokens.append({
+                    'Lexema': value,
+                    'Token': kind,
+                    'Valor': token_length,
+                    'Linha': line_number,
+                    'Coluna_Inicial': column_start,
+                    'Coluna_Final': column_end,
+                })
+
+        return self.tokens
+
+    def print_tokens_table(self):
+        output = f"{'Lexema':<20}{'Token':<20}{'Valor':<10}{'Linha':<10}{'Coluna Inicial':<15}{'Coluna Final':<15}\n"
+        output += "-" * 90 + "\n"
+        for token in self.tokens:
+            output += f"{token['Lexema']:<20}{token['Token']:<20}{token['Valor']:<10}{token['Linha']:<10}{token['Coluna_Inicial']:<15}{token['Coluna_Final']:<15}\n"
+        
+        print(output)  
+        return output  
+
+    def save_to_file(self, filename):
+        output = self.print_tokens_table()
+        with open(filename, 'w') as file:
+            file.write(output)
+
+if __name__ == "__main__":
+    with open('input.txt', 'r') as file:
+        source_code = file.read()
+
+    lexer = Lexer(source_code)
+    tokens = lexer.tokenize()
+    
+    if tokens:
+        lexer.save_to_file('output.txt')
+        print("A tabela de tokens foi salva em 'output'.")
