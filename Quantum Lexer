@@ -24,12 +24,12 @@ class Lexer:
 
         for match in re.finditer(token_regex, self.source_code):
             kind = match.lastgroup 
-            value = match.group() 
+            lex = match.group() 
             column_start = match.start() - line_start + 1  
             column_end = match.end() - line_start  
             if kind == 'SKIP':
-                if '\n' in value:
-                    line_number += value.count('\n')  
+                if '\n' in lex:
+                    line_number += lex.count('\n')  
                     line_start = match.end()  
                 continue
 
@@ -38,9 +38,9 @@ class Lexer:
                 return []  
 
             else:
-                token_length = len(value)  
+                token_length = len(lex)  
                 self.tokens.append({
-                    'Lexema': value,
+                    'Lexema': lex,
                     'Token': kind,
                     'Valor': token_length,
                     'Linha': line_number,
