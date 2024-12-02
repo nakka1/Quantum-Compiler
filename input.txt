@@ -1,0 +1,30 @@
+qubit q1; 
+qubit q2; 
+qubit q3; 
+qubit q4; 
+qubit q5;   
+bit b1;
+bit b2;
+bit b3;
+bit b4;    
+
+H q1;
+H q2;
+H q3;
+H q4;
+
+X q5;
+H q5;
+
+CX q1, q5;
+CX q3, q5;
+
+H q1;
+H q2;
+H q3;
+H q4;
+
+MEASURE q1, b1;
+MEASURE q2, b2;
+MEASURE q3, b3;
+MEASURE q4, b4;
